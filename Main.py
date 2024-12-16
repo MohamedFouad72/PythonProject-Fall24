@@ -153,4 +153,5 @@ removeButton = Button(frame, text="Remove Item", font=("Arial", 12), bg="#F44336
 removeButton.grid(row=6, column=0, columnspan=3, pady=10)
 stockTree.bind("<<TreeviewSelect>>", on_item_select)
 update_stock_display()
+
 root.mainloop()
