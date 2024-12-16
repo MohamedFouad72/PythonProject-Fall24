@@ -17,7 +17,7 @@ root = Tk()
 times_list = [f"{hour:02d}:{minute:02d}" for hour in range(24) for minute in range(60)]
 root.geometry("500x400")
 root.configure(bg="black")
-root.title("Order")
+root.title("Order Screen")
 title=ttk.Label(root,text="Order",font=("Arial",20,"bold"))
 title.pack(padx=10,pady=10)
 column=("Time","Type","Quntity","price","Employee Name","The Check")
