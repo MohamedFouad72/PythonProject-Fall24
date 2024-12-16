@@ -1,19 +1,12 @@
-# # We Will Write Everything Here!!
-# from tkinter import *
-# from PIL import ImageTk, Image
-# root1 = Tk()
-# root1.title("My First Program")
-
-
-
-
-
-
-# root1.mainloop()
-#Order Screen
+# We Will Write Everything Here!!
 from tkinter import *
 from tkinter import ttk
+from PIL import ImageTk, Image
 root = Tk()
+root.title("My First Program")
+
+
+#Order Screen
 times_list = [f"{hour:02d}:{minute:02d}" for hour in range(24) for minute in range(60)]
 root.geometry("500x400")
 root.configure(bg="black")
@@ -37,7 +30,6 @@ table.column("The Check",width=100,anchor=CENTER)
 time_entry=ttk.Combobox(root,width=40,values=times_list)
 time_entry.set("Select Time")
 time_entry.pack(padx=10,pady=10)
-
 table.pack()
 
 root.mainloop()
