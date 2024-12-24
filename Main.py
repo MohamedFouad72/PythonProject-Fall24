@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
 import os
+import json
 
 
 # Dictionary storing user credentials and roles
@@ -410,9 +411,7 @@ def open_menu_window(root):
     menu_win.image_refs = []
     menu_win.cart_items = []  # List to store cart items (each item is a dict)
 
-    create_navbar_buttonless_in_window(menu_win, root)
-
-    # =========== Define Nested Function: Open Cart Window ===========
+    # Function to open the cart window
     def open_cart_window():
         cart_win = tk.Toplevel(menu_win)
         cart_win.title("Cart")
@@ -466,27 +465,18 @@ def open_menu_window(root):
                                  font=("Arial", 12), command=checkout_cart)
         checkout_btn.pack(side="left", padx=5)
 
-    # =========== Add a Button to Open the Cart Window at the Top ===========
+    # Add a View Cart button at the top
     cart_button = tk.Button(menu_win, text="View Cart", font=("Arial", 12, "bold"),
                             bg="#2196F3", fg="white", command=open_cart_window)
     cart_button.pack(pady=10)
 
-    # =========== Sample Menu Items with Categories ===========
-    menu_items = {
-        "Food Items": [
-            {"name": "Burger", "price": 9.99, "image": "Images/burger.jpg"},
-            {"name": "Pizza",  "price": 12.50, "image": "Images/pizza.jpg"},
-            {"name": "Pasta",  "price": 8.75,  "image": "Images/pasta.jpg"},
-            {"name": "Sushi",  "price": 14.99, "image": "Images/sushi.jpg"},
-            {"name": "Steak",  "price": 19.99, "image": "Images/steak.jpg"},
-        ],
-        "Drinks": [
-            {"name": "Water",  "price": 1.50,  "image": "Images/water.jpg"},
-            {"name": "Juice",  "price": 3.75,  "image": "Images/juice.jpg"},
-            {"name": "Soda",   "price": 2.50,  "image": "Images/soda.jpg"},
-            {"name": "Coffee", "price": 2.25,  "image": "Images/coffee.jpg"},
-        ]
-    }
+    # Load menu data from JSON file
+    try:
+        with open("menu.json", "r") as file:
+            menu_items = json.load(file)
+    except Exception as e:
+        messagebox.showerror("Error", f"Could not load menu: {e}")
+        return
 
     # Scrollable Frame
     canvas = tk.Canvas(menu_win, bg="#161B33")
@@ -509,6 +499,7 @@ def open_menu_window(root):
         menu_win.cart_items.append(item_dict)
         messagebox.showinfo("Cart", f"Added {item_dict['name']} to cart!")
 
+    # Add menu items dynamically from JSON data
     for category, items in menu_items.items():
         category_label = tk.Label(scrollable_frame, text=category,
                                   font=("Arial", 20, "bold"), bg="#161B33", fg="#FFFFFF")
@@ -531,7 +522,6 @@ def open_menu_window(root):
                     menu_win.image_refs.append(tk_image)  # Prevent garbage collection
                     img_label = tk.Label(item_frame, image=tk_image, bg="#1F2C4D")
                     img_label.pack(pady=5)
-                    print(image_path)
                 else:
                     raise FileNotFoundError(f"Image not found: {image_path}")
             except Exception as e:
