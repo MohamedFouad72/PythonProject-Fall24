@@ -598,7 +598,6 @@ def main_window():
     login_button = Button(login_frame, text="Login", font=("Arial", 14),
                           fg="#161B33", bg="white", command=attempt_login)
     login_button.pack(pady=10)
-
     root.mainloop()
 # ---- Start the application ----
 if __name__ == "__main__":
