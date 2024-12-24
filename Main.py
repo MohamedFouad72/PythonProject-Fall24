@@ -406,12 +406,72 @@ def open_menu_window(root):
     menu_win.geometry("900x700")
     menu_win.configure(bg="#161B33")
 
-    # Create a list attached to the menu window to keep references alive
+    # Keep references to images and cart items within the window object
     menu_win.image_refs = []
+    menu_win.cart_items = []  # List to store cart items (each item is a dict)
 
     create_navbar_buttonless_in_window(menu_win, root)
 
-    # Sample menu items with categories
+    # =========== Define Nested Function: Open Cart Window ===========
+    def open_cart_window():
+        cart_win = tk.Toplevel(menu_win)
+        cart_win.title("Cart")
+        cart_win.geometry("500x400")
+        cart_win.configure(bg="#161B33")
+
+        # Cart Title
+        tk.Label(cart_win, text="Your Cart", font=("Arial", 20, "bold"),
+                 bg="#161B33", fg="white").pack(pady=10)
+
+        # Define a Treeview to show cart items
+        columns = ("Item Name", "Price")
+        cart_table = ttk.Treeview(cart_win, columns=columns, show="headings", height=8)
+        cart_table.heading("Item Name", text="Item Name")
+        cart_table.heading("Price", text="Price")
+        cart_table.column("Item Name", anchor="center", width=200)
+        cart_table.column("Price", anchor="center", width=100)
+        cart_table.pack(pady=10)
+
+        # Function to populate (or re-populate) the cart table
+        def load_cart_items():
+            cart_table.delete(*cart_table.get_children())
+            for item in menu_win.cart_items:
+                cart_table.insert("", "end", values=(item["name"], f"${item['price']:.2f}"))
+
+        load_cart_items()
+
+        # Clear the cart items
+        def clear_cart():
+            menu_win.cart_items.clear()
+            load_cart_items()
+
+        # Checkout function
+        def checkout_cart():
+            if menu_win.cart_items:
+                messagebox.showinfo("Checkout", "Checked out successfully!")
+                menu_win.cart_items.clear()
+                load_cart_items()
+            else:
+                messagebox.showinfo("Checkout", "Cart is already empty.")
+
+        # Buttons for clearing and checkout
+        btn_frame = tk.Frame(cart_win, bg="#161B33")
+        btn_frame.pack(pady=10)
+
+        clear_btn = tk.Button(btn_frame, text="Clear", bg="#F44336", fg="white",
+                              font=("Arial", 12), command=clear_cart)
+        clear_btn.pack(side="left", padx=5)
+
+        checkout_btn = tk.Button(btn_frame, text="Checkout", bg="#4CAF50", fg="white",
+                                 font=("Arial", 12), command=checkout_cart)
+        checkout_btn.pack(side="left", padx=5)
+
+    # =========== Add a Button to Open the Cart Window at the Top ===========
+    cart_button = tk.Button(menu_win, text="View Cart", font=("Arial", 12, "bold"),
+                            bg="#2196F3", fg="white", command=open_cart_window)
+    cart_button.pack(pady=10)
+
+    # =========== Sample Menu Items with Categories ===========
     menu_items = {
         "Food Items": [
             {"name": "Burger", "price": 9.99, "image": "Images/burger.jpg"},
@@ -421,10 +481,10 @@ def open_menu_window(root):
             {"name": "Steak",  "price": 19.99, "image": "Images/steak.jpg"},
         ],
         "Drinks": [
-            {"name": "Water",  "price": 1.50, "image": "Images/water.jpg"},
-            {"name": "Juice",  "price": 3.75, "image": "Images/juice.jpg"},
-            {"name": "Soda",   "price": 2.50, "image": "Images/soda.jpg"},
-            {"name": "Coffee", "price": 2.25, "image": "Images/coffee.jpg"},
+            {"name": "Water",  "price": 1.50,  "image": "Images/water.jpg"},
+            {"name": "Juice",  "price": 3.75,  "image": "Images/juice.jpg"},
+            {"name": "Soda",   "price": 2.50,  "image": "Images/soda.jpg"},
+            {"name": "Coffee", "price": 2.25,  "image": "Images/coffee.jpg"},
         ]
     }
 
@@ -444,14 +504,14 @@ def open_menu_window(root):
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
+    # Helper function to add an item to cart
+    def add_to_cart(item_dict):
+        menu_win.cart_items.append(item_dict)
+        messagebox.showinfo("Cart", f"Added {item_dict['name']} to cart!")
+
     for category, items in menu_items.items():
-        category_label = tk.Label(
-            scrollable_frame,
-            text=category,
-            font=("Arial", 20, "bold"),
-            bg="#161B33",
-            fg="#FFFFFF"
-        )
+        category_label = tk.Label(scrollable_frame, text=category,
+                                  font=("Arial", 20, "bold"), bg="#161B33", fg="#FFFFFF")
         category_label.pack(pady=10, anchor="w", padx=20)
 
         category_frame = tk.Frame(scrollable_frame, bg="#161B33")
@@ -468,9 +528,7 @@ def open_menu_window(root):
                 if os.path.exists(image_path):
                     pil_image = Image.open(image_path).resize((150, 150))
                     tk_image = ImageTk.PhotoImage(pil_image)
-                    # Store reference in menu_win.image_refs
-                    menu_win.image_refs.append(tk_image)
-
+                    menu_win.image_refs.append(tk_image)  # Prevent garbage collection
                     img_label = tk.Label(item_frame, image=tk_image, bg="#1F2C4D")
                     img_label.pack(pady=5)
                     print(image_path)
@@ -493,7 +551,8 @@ def open_menu_window(root):
             # Add to Cart Button
             buy_button = tk.Button(item_frame, text="Add to Cart",
                                    font=("Arial", 10, "bold"),
-                                   bg="#4CAF50", fg="white")
+                                   bg="#4CAF50", fg="white",
+                                   command=lambda i=item: add_to_cart(i))
             buy_button.pack(pady=5)
 
 # ------------------ MAIN WINDOW (LOGIN) ------------------ #
