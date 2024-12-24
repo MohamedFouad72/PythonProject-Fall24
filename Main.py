@@ -406,21 +406,24 @@ def open_menu_window(root):
     menu_win.geometry("900x700")
     menu_win.configure(bg="#161B33")
 
+    # Create a list attached to the menu window to keep references alive
+    menu_win.image_refs = []
+
     create_navbar_buttonless_in_window(menu_win, root)
 
     # Sample menu items with categories
     menu_items = {
         "Food Items": [
             {"name": "Burger", "price": 9.99, "image": "Images/burger.jpg"},
-            {"name": "Pizza", "price": 12.50, "image": "Images/pizza.jpg"},
-            {"name": "Pasta", "price": 8.75, "image": "Images/pasta.jpg"},
-            {"name": "Sushi", "price": 14.99, "image": "Images/sushi.jpg"},
-            {"name": "Steak", "price": 19.99, "image": "Images/steak.jpg"},
+            {"name": "Pizza",  "price": 12.50, "image": "Images/pizza.jpg"},
+            {"name": "Pasta",  "price": 8.75,  "image": "Images/pasta.jpg"},
+            {"name": "Sushi",  "price": 14.99, "image": "Images/sushi.jpg"},
+            {"name": "Steak",  "price": 19.99, "image": "Images/steak.jpg"},
         ],
         "Drinks": [
-            {"name": "Water", "price": 1.50, "image": "Images/water.jpg"},
-            {"name": "Juice", "price": 3.75, "image": "Images/juice.jpg"},
-            {"name": "Soda", "price": 2.50, "image": "Images/soda.jpg"},
+            {"name": "Water",  "price": 1.50, "image": "Images/water.jpg"},
+            {"name": "Juice",  "price": 3.75, "image": "Images/juice.jpg"},
+            {"name": "Soda",   "price": 2.50, "image": "Images/soda.jpg"},
             {"name": "Coffee", "price": 2.25, "image": "Images/coffee.jpg"},
         ]
     }
@@ -441,12 +444,14 @@ def open_menu_window(root):
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    # Store references to images
-    image_refs = []
-
     for category, items in menu_items.items():
-        category_label = tk.Label(scrollable_frame, text=category,
-                                  font=("Arial", 20, "bold"), bg="#161B33", fg="#FFFFFF")
+        category_label = tk.Label(
+            scrollable_frame,
+            text=category,
+            font=("Arial", 20, "bold"),
+            bg="#161B33",
+            fg="#FFFFFF"
+        )
         category_label.pack(pady=10, anchor="w", padx=20)
 
         category_frame = tk.Frame(scrollable_frame, bg="#161B33")
@@ -463,7 +468,9 @@ def open_menu_window(root):
                 if os.path.exists(image_path):
                     pil_image = Image.open(image_path).resize((150, 150))
                     tk_image = ImageTk.PhotoImage(pil_image)
-                    image_refs.append(tk_image)  # Prevent garbage collection
+                    # Store reference in menu_win.image_refs
+                    menu_win.image_refs.append(tk_image)
+
                     img_label = tk.Label(item_frame, image=tk_image, bg="#1F2C4D")
                     img_label.pack(pady=5)
                     print(image_path)
@@ -484,7 +491,8 @@ def open_menu_window(root):
             price_label.pack(pady=2)
 
             # Add to Cart Button
-            buy_button = tk.Button(item_frame, text="Add to Cart", font=("Arial", 10, "bold"),
+            buy_button = tk.Button(item_frame, text="Add to Cart",
+                                   font=("Arial", 10, "bold"),
                                    bg="#4CAF50", fg="white")
             buy_button.pack(pady=5)
 
