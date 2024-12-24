@@ -10,6 +10,6 @@
         {"name": "Water",  "price": 1.50, "image": "Images/water.jpg"},
         {"name": "Juice",  "price": 3.75, "image": "Images/juice.jpg"},
         {"name": "Soda",   "price": 2.50, "image": "Images/soda.jpg"},
-        {"name": "Coffee", "price": 2.25, "image": "Images/coffee.jpg"}
+        {"name": "Coffee", "price": 2.25, "image": "Images/coffe.jpg"}
     ]
 }
