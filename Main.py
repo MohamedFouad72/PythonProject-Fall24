@@ -408,21 +408,18 @@ def open_menu_window(root):
     menu_win.configure(bg="#161B33")
 
     # Keep references to images and cart items within the window object
-    menu_win.image_refs = []
-    menu_win.cart_items = []  # List to store cart items (each item is a dict)
+    menu_win.image_refs = [] #قائمة بتخزن الصورة الي يتم تحميلها لضمان عدم فقدانها
+    menu_win.cart_items = [] #قائمة لتخزين العناصر التي تمت اضافتها الي السلة حيث تخزن كل عنصر في شكل قاموس
 
-    # Function to open the cart window
     def open_cart_window():
         cart_win = tk.Toplevel(menu_win)
         cart_win.title("Cart")
         cart_win.geometry("500x400")
         cart_win.configure(bg="#161B33")
 
-        # Cart Title
         tk.Label(cart_win, text="Your Cart", font=("Arial", 20, "bold"),
                  bg="#161B33", fg="white").pack(pady=10)
 
-        # Define a Treeview to show cart items
         columns = ("Item Name", "Price")
         cart_table = ttk.Treeview(cart_win, columns=columns, show="headings", height=8)
         cart_table.heading("Item Name", text="Item Name")
@@ -430,22 +427,16 @@ def open_menu_window(root):
         cart_table.column("Item Name", anchor="center", width=200)
         cart_table.column("Price", anchor="center", width=100)
         cart_table.pack(pady=10)
-
-        # Function to populate (or re-populate) the cart table
-        def load_cart_items():
+        def load_cart_items():# تقوم بتحميل العناصر من الcart وعرضها في الجدول
             cart_table.delete(*cart_table.get_children())
             for item in menu_win.cart_items:
                 cart_table.insert("", "end", values=(item["name"], f"${item['price']:.2f}"))
 
         load_cart_items()
-
-        # Clear the cart items
-        def clear_cart():
+        def clear_cart():#ده الدالة لمهمة زر الclear
             menu_win.cart_items.clear()
             load_cart_items()
-
-        # Checkout function
-        def checkout_cart():
+        def checkout_cart():#هذه الدالة مهمتها اذا كانت السلة تحتوي علي عناصر يتم عرض رسالة تاكيد تم يتم مسح الجدول بتاع السلة واذا كانت فارغة من الاساس ترسل رسالة للمستخدم
             if menu_win.cart_items:
                 messagebox.showinfo("Checkout", "Checked out successfully!")
                 menu_win.cart_items.clear()
@@ -470,7 +461,7 @@ def open_menu_window(root):
                             bg="#2196F3", fg="white", command=open_cart_window)
     cart_button.pack(pady=10)
 
-    # Load menu data from JSON file
+    # هنا يتم عرض البيانات من فايل الي json باستخدام مكتبة json وفي حالة حدوث خطا يتم عرض رسالة خطا
     try:
         with open("menu.json", "r") as file:
             menu_items = json.load(file)
@@ -478,7 +469,7 @@ def open_menu_window(root):
         messagebox.showerror("Error", f"Could not load menu: {e}")
         return
 
-    # Scrollable Frame
+    # تم عمل canvas لاحتواء المحتوي القابل للتمرير ويتم ربط scrollbar بcanvas بحيث يمكن للمستخدم ان يعمل scroll
     canvas = tk.Canvas(menu_win, bg="#161B33")
     scrollbar = tk.Scrollbar(menu_win, orient="vertical", command=canvas.yview)
     scrollable_frame = tk.Frame(canvas, bg="#161B33")
@@ -494,12 +485,12 @@ def open_menu_window(root):
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    # Helper function to add an item to cart
+    # هذة الدالة عندما يضعط المستخدم علي add to cart يظهر له رسالة ان تم وضعها في السلة
     def add_to_cart(item_dict):
         menu_win.cart_items.append(item_dict)
         messagebox.showinfo("Cart", f"Added {item_dict['name']} to cart!")
 
-    # Add menu items dynamically from JSON data
+    # يتم من خلال الloop اضافة نوع من الاكل الي النافذة ثم يتم اضافة العناصر ضمن كل فئة
     for category, items in menu_items.items():
         category_label = tk.Label(scrollable_frame, text=category,
                                   font=("Arial", 20, "bold"), bg="#161B33", fg="#FFFFFF")
@@ -508,13 +499,13 @@ def open_menu_window(root):
         category_frame = tk.Frame(scrollable_frame, bg="#161B33")
         category_frame.pack(padx=20, pady=10, fill="x")
 
-        for i, item in enumerate(items):
+        for i, item in enumerate(items):#الenumarte يعتبر بتعمل الi هو يعتبر اول رقم الي هو بيبقي صفر وبعد كدا الitem بيبدا في الترتيب يعني بتعملوا انواكتاب ليه فهرس ويعد من اول صفحة لحد الاخر
             item_frame = tk.Frame(category_frame, bg="#1F2C4D", bd=3, relief="raised")
             item_frame.grid(row=i // 2, column=i % 2, padx=10, pady=10, sticky="nsew")
             category_frame.columnconfigure(i % 2, weight=1)
 
             # Image Loading
-            try:
+            try:#هنا يثم تحميل البيانات القائمة من الملف الي اسموا menu.json في حالة حدوث خطا اثناء تحميل البيانات ويتم عرض رسالة الerror
                 image_path = os.path.abspath(item["image"])
                 if os.path.exists(image_path):
                     pil_image = Image.open(image_path).resize((150, 150))
