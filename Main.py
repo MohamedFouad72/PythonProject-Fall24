@@ -41,54 +41,6 @@ menuItems = [
     # ... etc ...
 ]
 
-# ------------------ NAVBAR CREATOR ------------------ #
-def create_navbar_in_window(window, root):
-
-    navbar = Frame(window, bg="#0D1B42", height=50)
-    navbar.pack(side="top", fill="x")
-    logo_path = "Images/cuisine control white png.png"
-    if logo_path:
-        loaded_img = Image.open(logo_path)
-        loaded_img = loaded_img.resize((120, 120))
-        logo_img = ImageTk.PhotoImage(loaded_img)
-
-        logo_label = Label(navbar, image=logo_img, bg="#0D1B42")
-        logo_label.image = logo_img  # Keep reference
-        logo_label.pack(side="left", padx=10, pady=5)
-    else:
-        Label(navbar, text="CuisineControl", bg="#0D1B42", fg="white",
-              font=("Arial", 14, "bold")).pack(side="left", padx=10)
-
-
-    # Buttons to navigate to other windows
-    def go_home():
-        window.destroy()
-
-    def go_order():
-        open_order_window(root)
-
-    def go_inventory():
-        open_inventory_window(root)
-
-    def go_staff():
-        open_staff_window(root)
-
-    btn_home = Button(navbar, text="Home", bg="#FFFFFF", fg="#0D1B42",
-                      font=("Arial", 12, "bold"), command=go_home)
-    btn_home.pack(side="left", padx=5, pady=5)
-
-    btn_order = Button(navbar, text="Order", bg="#FFFFFF", fg="#0D1B42",
-                       font=("Arial", 12, "bold"), command=go_order)
-    btn_order.pack(side="left", padx=5, pady=5)
-
-    btn_inventory = Button(navbar, text="Inventory", bg="#FFFFFF", fg="#0D1B42",
-                           font=("Arial", 12, "bold"), command=go_inventory)
-    btn_inventory.pack(side="left", padx=5, pady=5)
-
-    btn_staff = Button(navbar, text="Staff", bg="#FFFFFF", fg="#0D1B42",
-                       font=("Arial", 12, "bold"), command=go_staff)
-    btn_staff.pack(side="left", padx=5, pady=5)
-
 # ------------------ NO BUTTONS NAVBAR CREATOR ------------------ #
 def create_navbar_buttonless_in_window(window, root):
 
@@ -114,7 +66,7 @@ def open_order_window(root):
     order_win.geometry("700x600")
     order_win.configure(bg="#161B33")
 
-    create_navbar_in_window(order_win, root)
+    create_navbar_buttonless_in_window(order_win, root)
 
     title_label = ttk.Label(order_win, text="Order", font=("Arial", 20, "bold"),
                             background="#161B33", foreground="white")
@@ -155,7 +107,7 @@ def open_inventory_window(root):
     inventory_win.geometry("900x800")
     inventory_win.configure(bg="#161B33")
 
-    create_navbar_in_window(inventory_win, root)
+    create_navbar_buttonless_in_window(inventory_win, root)
 
     main_frame = Frame(inventory_win, bg="#161B33")
     main_frame.pack(expand=True)
@@ -305,7 +257,7 @@ def open_staff_window(root):
     staff_win.geometry("1200x600")
     staff_win.configure(bg="#161B33")
 
-    create_navbar_in_window(staff_win, root)
+    create_navbar_buttonless_in_window(staff_win, root)
 
     title = Label(staff_win, text="Employee Application", bg="#161B33", fg="white",
                   font=("Arial", 20, "bold"))
@@ -447,14 +399,14 @@ def open_staff_window(root):
     deduction_button = ttk.Button(staff_win, text="Deduction", command=deduction)
     deduction_button.pack(padx=10, pady=10)
 
-
+# ------------------ Menu WINDOW ------------------ #
 def open_menu_window(root):
     menu_win = tk.Toplevel(root)
     menu_win.title("Restaurant Menu")
     menu_win.geometry("900x700")
     menu_win.configure(bg="#161B33")
 
-    create_navbar_in_window(menu_win, root)
+    create_navbar_buttonless_in_window(menu_win, root)
 
     # Sample menu items with categories
     menu_items = {
@@ -535,7 +487,6 @@ def open_menu_window(root):
             buy_button = tk.Button(item_frame, text="Add to Cart", font=("Arial", 10, "bold"),
                                    bg="#4CAF50", fg="white")
             buy_button.pack(pady=5)
-
 
 # ------------------ MAIN WINDOW (LOGIN) ------------------ #
 def main_window():
