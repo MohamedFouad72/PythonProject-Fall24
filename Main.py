@@ -600,7 +600,6 @@ def main_window():
     login_button.pack(pady=10)
 
     root.mainloop()
-
 # ---- Start the application ----
 if __name__ == "__main__":
     main_window()
