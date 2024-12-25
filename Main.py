@@ -5,6 +5,12 @@ from PIL import ImageTk, Image
 import os
 import json
 
+# Global references so logout can manipulate them
+root = None
+login_frame = None
+post_login_frame = None
+email_entry = None
+password_entry = None
 
 # Dictionary storing user credentials and roles
 users = {
@@ -42,23 +48,56 @@ menuItems = [
     # ... etc ...
 ]
 
+def logout():
+    """
+    Close any open Toplevel windows and show the login page.
+    Also clear the email & password entries.
+    """
+    global root, login_frame, post_login_frame, email_entry, password_entry
+
+    # Close any Toplevel windows (e.g., inventory, staff, menu, order windows)
+    for w in root.winfo_children():
+        if isinstance(w, Toplevel):
+            w.destroy()
+
+    # Hide the post-login frame (if it was showing)
+    try:
+        post_login_frame.pack_forget()
+    except:
+        pass
+
+    # Clear the login fields
+    email_entry.delete(0, tk.END)
+    password_entry.delete(0, tk.END)
+
+    # Show the login frame again
+    login_frame.pack(fill="both", expand=True)
+
 # ------------------ NO BUTTONS NAVBAR CREATOR ------------------ #
 def create_navbar_buttonless_in_window(window, root):
-
+    """
+    Creates a top navbar with a logo on the left and a Logout button on the right.
+    """
     navbar = Frame(window, bg="#0D1B42", height=50)
     navbar.pack(side="top", fill="x")
+
+    # Logo on the left
     logo_path = "Images/cuisine control white png.png"
     if logo_path:
         loaded_img = Image.open(logo_path)
         loaded_img = loaded_img.resize((120, 120))
         logo_img = ImageTk.PhotoImage(loaded_img)
-
         logo_label = Label(navbar, image=logo_img, bg="#0D1B42")
         logo_label.image = logo_img  # Keep reference
-        logo_label.pack(side="top", padx=10, pady=5)
+        logo_label.pack(side="left", padx=10, pady=5)
     else:
         Label(navbar, text="CuisineControl", bg="#0D1B42", fg="white",
               font=("Arial", 14, "bold")).pack(side="left", padx=10)
+
+    # Logout button on the right
+    logout_button = tk.Button(navbar, text="Logout", font=("Arial", 12),
+                              bg="White", fg="Black", width=15, command=logout)
+    logout_button.pack(side="right", padx=5)
 
 # ------------------ ORDER WINDOW ------------------ #
 def open_order_window(root):
@@ -96,13 +135,13 @@ def open_order_window(root):
     table.column("Employee Name", width=120, anchor="center")
     table.column("The Check", width=100, anchor="center")
     table.pack(padx=10, pady=10)
+
     close_button = tk.Button(order_win, text="Close", font=("Arial", 12),
                              command=order_win.destroy, bg="#FFFFFF", fg="#161B33")
     close_button.pack(pady=20)
 
 # ------------------ INVENTORY WINDOW ------------------ #
 def open_inventory_window(root):
-
     inventory_win = tk.Toplevel(root)
     inventory_win.title("Inventory Screen")
     inventory_win.geometry("900x800")
@@ -235,8 +274,6 @@ def open_inventory_window(root):
 
 # ------------------ STAFF WINDOW ------------------ #
 def open_staff_window(root):
-
-
     # Data for the staff window
     data = [
         {"Employee_Name": "Omar Ahmed",      "Salary": 8000,  "Age": 24,
@@ -268,7 +305,6 @@ def open_staff_window(root):
         "Employee_Name", "Salary", "salary_deduction", "Age",
         "Phone number", "Date of appointment", "Job Type", "Job"
     ]
-
 
     staff_table = ttk.Treeview(staff_win, columns=column1, show="headings", height=10)
     for col in column1:
@@ -394,7 +430,6 @@ def open_staff_window(root):
         close_button.pack(padx=10, pady=10)
 
     def deduction():
-
         open_deduction_window(load_data)
 
     deduction_button = ttk.Button(staff_win, text="Deduction", command=deduction)
@@ -407,9 +442,10 @@ def open_menu_window(root):
     menu_win.geometry("900x700")
     menu_win.configure(bg="#161B33")
 
-    # Keep references to images and cart items within the window object
-    menu_win.image_refs = [] #قائمة بتخزن الصورة الي يتم تحميلها لضمان عدم فقدانها
-    menu_win.cart_items = [] #قائمة لتخزين العناصر التي تمت اضافتها الي السلة حيث تخزن كل عنصر في شكل قاموس
+    menu_win.image_refs = []  # references to images
+    menu_win.cart_items = []  # cart items
+
+    create_navbar_buttonless_in_window(menu_win, root)
 
     def open_cart_window():
         cart_win = tk.Toplevel(menu_win)
@@ -427,16 +463,19 @@ def open_menu_window(root):
         cart_table.column("Item Name", anchor="center", width=200)
         cart_table.column("Price", anchor="center", width=100)
         cart_table.pack(pady=10)
-        def load_cart_items():# تقوم بتحميل العناصر من الcart وعرضها في الجدول
+
+        def load_cart_items():
             cart_table.delete(*cart_table.get_children())
             for item in menu_win.cart_items:
                 cart_table.insert("", "end", values=(item["name"], f"${item['price']:.2f}"))
 
         load_cart_items()
-        def clear_cart():#ده الدالة لمهمة زر الclear
+
+        def clear_cart():
             menu_win.cart_items.clear()
             load_cart_items()
-        def checkout_cart():#هذه الدالة مهمتها اذا كانت السلة تحتوي علي عناصر يتم عرض رسالة تاكيد تم يتم مسح الجدول بتاع السلة واذا كانت فارغة من الاساس ترسل رسالة للمستخدم
+
+        def checkout_cart():
             if menu_win.cart_items:
                 messagebox.showinfo("Checkout", "Checked out successfully!")
                 menu_win.cart_items.clear()
@@ -461,7 +500,7 @@ def open_menu_window(root):
                             bg="#2196F3", fg="white", command=open_cart_window)
     cart_button.pack(pady=10)
 
-    # هنا يتم عرض البيانات من فايل الي json باستخدام مكتبة json وفي حالة حدوث خطا يتم عرض رسالة خطا
+    # Load menu items from JSON
     try:
         with open("menu.json", "r") as file:
             menu_items = json.load(file)
@@ -469,7 +508,7 @@ def open_menu_window(root):
         messagebox.showerror("Error", f"Could not load menu: {e}")
         return
 
-    # تم عمل canvas لاحتواء المحتوي القابل للتمرير ويتم ربط scrollbar بcanvas بحيث يمكن للمستخدم ان يعمل scroll
+    # Scrollable Frame
     canvas = tk.Canvas(menu_win, bg="#161B33")
     scrollbar = tk.Scrollbar(menu_win, orient="vertical", command=canvas.yview)
     scrollable_frame = tk.Frame(canvas, bg="#161B33")
@@ -485,12 +524,10 @@ def open_menu_window(root):
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    # هذة الدالة عندما يضعط المستخدم علي add to cart يظهر له رسالة ان تم وضعها في السلة
     def add_to_cart(item_dict):
         menu_win.cart_items.append(item_dict)
         messagebox.showinfo("Cart", f"Added {item_dict['name']} to cart!")
 
-    # يتم من خلال الloop اضافة نوع من الاكل الي النافذة ثم يتم اضافة العناصر ضمن كل فئة
     for category, items in menu_items.items():
         category_label = tk.Label(scrollable_frame, text=category,
                                   font=("Arial", 20, "bold"), bg="#161B33", fg="#FFFFFF")
@@ -499,13 +536,13 @@ def open_menu_window(root):
         category_frame = tk.Frame(scrollable_frame, bg="#161B33")
         category_frame.pack(padx=20, pady=10, fill="x")
 
-        for i, item in enumerate(items):#الenumarte يعتبر بتعمل الi هو يعتبر اول رقم الي هو بيبقي صفر وبعد كدا الitem بيبدا في الترتيب يعني بتعملوا انواكتاب ليه فهرس ويعد من اول صفحة لحد الاخر
+        for i, item in enumerate(items):
             item_frame = tk.Frame(category_frame, bg="#1F2C4D", bd=3, relief="raised")
             item_frame.grid(row=i // 2, column=i % 2, padx=10, pady=10, sticky="nsew")
             category_frame.columnconfigure(i % 2, weight=1)
 
             # Image Loading
-            try:#هنا يثم تحميل البيانات القائمة من الملف الي اسموا menu.json في حالة حدوث خطا اثناء تحميل البيانات ويتم عرض رسالة الerror
+            try:
                 image_path = os.path.abspath(item["image"])
                 if os.path.exists(image_path):
                     pil_image = Image.open(image_path).resize((150, 150))
@@ -538,18 +575,21 @@ def open_menu_window(root):
 
 # ------------------ MAIN WINDOW (LOGIN) ------------------ #
 def main_window():
-    global root
+    global root, login_frame, post_login_frame, email_entry, password_entry
+
     root = tk.Tk()
     root.title("Cuisine Control - Login")
     root.geometry("900x600")
     root.configure(bg="#161B33")
 
+    # create frames
+    login_frame = Frame(root, bg="#161B33")
+    post_login_frame = Frame(root, bg="#161B33")
+
+    # create the top navbar on the main window
     create_navbar_buttonless_in_window(root, root)
 
-
-
     # ============= LOGIN FRAME =============
-    login_frame = Frame(root, bg="#161B33")
     login_frame.pack(fill="both", expand=True)
 
     Label(login_frame, text="Login", font=("Arial", 24, "bold"), bg="#161B33", fg="white").pack(pady=20)
@@ -557,19 +597,18 @@ def main_window():
     # Email
     email_label = Label(login_frame, text="Email:", font=("Arial", 14, "bold"), bg="#161B33", fg="white")
     email_label.pack(pady=5)
+
     email_entry = Entry(login_frame, width=40, font=("Arial", 12))
     email_entry.pack(pady=5)
 
     # Password
     password_label = Label(login_frame, text="Password:", font=("Arial", 14, "bold"), bg="#161B33", fg="white")
     password_label.pack(pady=5)
+
     password_entry = Entry(login_frame, width=40, font=("Arial", 12), show="*")
     password_entry.pack(pady=5)
 
     # ============= POST-LOGIN FRAME =============
-    post_login_frame = Frame(root, bg="#161B33")
-    # We'll pack this frame only after successful login
-
     Label(post_login_frame, text="Welcome!", font=("Arial", 24, "bold"), bg="#161B33", fg="white").pack(pady=20)
 
     def open_order():
@@ -583,7 +622,6 @@ def main_window():
 
     def open_menu():
         open_menu_window(root)
-
 
     def show_role_buttons(role):
         """Show the buttons relevant to the user’s role on the main screen."""
@@ -615,13 +653,13 @@ def main_window():
             order_screen_button.pack(pady=10)
 
             menu_screen_button = tk.Button(post_login_frame, text="Go to Menu Screen",
-                                            font=("Arial", 14), command=open_menu,
-                                            bg="#FFFFFF", fg="#161B33")
+                                           font=("Arial", 14), command=open_menu,
+                                           bg="#FFFFFF", fg="#161B33")
             menu_screen_button.pack(pady=10)
 
     def attempt_login():
         email = email_entry.get().strip().lower()
-        pwd   = password_entry.get().strip()
+        pwd = password_entry.get().strip()
 
         if email in users:
             if users[email]["password"] == pwd:
@@ -638,8 +676,9 @@ def main_window():
     login_button = Button(login_frame, text="Login", font=("Arial", 14),
                           fg="#161B33", bg="white", command=attempt_login)
     login_button.pack(pady=10)
+
     root.mainloop()
+
 # ---- Start the application ----
 if __name__ == "__main__":
     main_window()
-#dont change anything
