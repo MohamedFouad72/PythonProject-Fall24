@@ -48,6 +48,7 @@ menuItems = [
     # ... etc ...
 ]
 
+# ------------------ LOGOUT FUNCTION ------------------ #
 def logout():
     """
     Close any open Toplevel windows and show the login page.
