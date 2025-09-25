@@ -39,16 +39,17 @@ Cuisine-Control/
 
 You can get the project in two ways:
 
-### 🔹 Option 1: Clone the repository
+### 🔹 Option 1: Download ZIP
+1. Go to the repository page 👉 [Cuisine Control](https://github.com/MohamedFouad72/PythonProject-Fall24)  
+2. Click on the green **Code** button  
+3. Select **Download ZIP**  
+4. Extract the ZIP file and open the project folder  
+
+### 🔹 Option 2: Clone the repository
 If you have Git installed, run:
 ```bash
 git clone https://github.com/MohamedFouad72/PythonProject-Fall24.git
-### 🔹 Option 2: Download ZIP
 
-Go to the repository page 👉 Cuisine Control
 
-Click on the green Code button
 
-Select Download ZIP
 
-Extract the ZIP file and open the project folder
